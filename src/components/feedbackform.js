@@ -12,15 +12,23 @@ import axios from 'axios';
 
 const FeedBackForm = () => {
     const [isSelected, setIsSelected] = useState(false);
+    const [feedback, setFeedback] = useState("");
+    const [fType, setFType] = useState("");
+    const [relation, setRelation] = useState("");
+    const [rating, setRating] = useState("Amazing");
     const [checked, setChecked] = useState(false);
     const [known, setKnown] = useState("");
-    const handleFeedbackType = () => {
+
+
+    const handleFeedbackType = (e) => {
+        setFType(e.target.value);
     }
     const handleKnown = (value) => {
         setKnown(value);
         setIsSelected(true);
+        setRelation(value);
     }
-   
+
     const deleteData = () => {
         setKnown("");
         setIsSelected(false);
@@ -34,29 +42,43 @@ const FeedBackForm = () => {
         }
     }
 
-    const postFeedback =()=> {
-    
-        const config = {
-            headers: { Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzA3Mjc0OGZkZGVmMDhiNWU3NzA0MTciLCJpYXQiOjE2NjMxNTIzODQsInR5cGUiOiJhY2Nlc3MifQ.CTGJNRDw069hJuL9tyb0OBKzWqnn8K8jZdbljU-ZKns` }
-        };
-        const data = {
-            user: "6308921f3ada99af131ba20",
-            sender: "63071c60b7371a1288eeea0b",
-            score: "great",
-            reviewType: "opinion",
-            relation: "friend",
-            text: "Hey this is testing feedback sent by Mahesh from React App. Let's see if it works properly. -----------------------------",
-            shared: "hs"
-        };
-        axios.post(
-            'https://api.qriteeq.com/v2/feedback/', data,config
-        ).then(res => {
-              console.log(res);
-            })
-            .catch(function (error) {
-              console.error(error);
-            });
+    const postFeedback = () => {
 
+        if (fType.length === 0) {
+            alert("Please Select Feedback Type");
+        }
+        else if (feedback.length === 0) {
+            alert("Please Enter Feedback");
+        }
+        else if (feedback.length < 50) {
+            alert("Please Enter More than 50 Words for Feedback");
+        }
+        else if (relation.length === 0) {
+            alert("Please Select Relation");
+        }
+        else {
+            const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzA3Mjc0OGZkZGVmMDhiNWU3NzA0MTciLCJpYXQiOjE2NjMxNTIzODQsInR5cGUiOiJhY2Nlc3MifQ.CTGJNRDw069hJuL9tyb0OBKzWqnn8K8jZdbljU-ZKns"
+            const config = {
+                headers: { Authorization : `Bearer ${token}` }
+            };
+            const data = {
+                user: ""+localStorage.getItem("USERID"),
+                sender: ""+localStorage.getItem("SENDERID"),
+                score: ""+rating,
+                reviewType: ""+fType,
+                relation: ""+relation,
+                text: ""+feedback,
+                shared: "hs"
+            };
+            axios.post(
+                'https://api.qriteeq.com/v2/feedback/',data,config
+            ).then(res => {
+                  console.log(res);
+                })
+                .catch(function (error) {
+                  console.error(error);
+                });   
+        }
     }
     return (
         <div class="wrapper">
@@ -71,14 +93,16 @@ const FeedBackForm = () => {
                                 Type of Feedback
                             </InputLabel>
                             <NativeSelect
-                                name="feedbacktype"
+                                name="fType"
+                                // value={fType}
                                 onChange={handleFeedbackType}
                             >
-                                <option>Opinion</option>
-                                <option>True Story</option>
-                                <option>Gossip</option>
-                                <option>Campaign</option>
-                                <option>General Feedback</option>
+                                <option>Select Feedback Type</option>
+                                <option value={"Opinion"}>Opinion</option>
+                                <option value={"True Story"}>True Story</option>
+                                <option value={"Gossip"}>Gossip</option>
+                                <option value={"Campaign"}>Campaign</option>
+                                <option value={"General Feedback"}>General Feedback</option>
                             </NativeSelect>
                         </FormControl>
                     </Box>
@@ -90,6 +114,8 @@ const FeedBackForm = () => {
                     <textarea
                         style={{ width: "320px", minHeight: "70px", marginTop: '1rem', fontSize: "12px" }}
                         type="text"
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
                         placeholder="Write your feedback (minimum 50 character required)"
                     >
                     </textarea>
@@ -114,13 +140,18 @@ const FeedBackForm = () => {
                     How would you rate their personality
                 </Typography>
                 <div style={{ display: "flex", marginTop: "1rem", marginLeft: "20px", marginRight: "20px" }} className="wrapper">
-                    <img alt='' src='/assets/angryHighlight.png' style={{ height: "40px" }}></img>
-                    <img alt='' src='/assets/sadHighlight.png' style={{ height: "40px", marginLeft: "20px" }}></img>
-                    <img alt='' src='/assets/smileHighlight.png' style={{ height: "40px", marginLeft: "20px" }}></img>
-                    <img alt='' src='/assets/happyHighlight.png' style={{ height: "40px", marginLeft: "20px" }}></img>
-                    <img alt='' src='/assets/amazingHighlight.png' style={{ height: "40px", marginLeft: "20px" }}></img>
+                    <img onClick={() => setRating("Bad")} alt='' src='/assets/angryHighlight.png' style={{ height: "40px", cursor: "pointer" }}></img>
+                    <img onClick={() => setRating("Poor")} alt='' src='/assets/sadHighlight.png' style={{ height: "40px", marginLeft: "20px", cursor: "pointer" }}></img>
+                    <img onClick={() => setRating("Fine")} alt='' src='/assets/smileHighlight.png' style={{ height: "40px", marginLeft: "20px", cursor: "pointer" }}></img>
+                    <img onClick={() => setRating("Great")} alt='' src='/assets/happyHighlight.png' style={{ height: "40px", marginLeft: "20px", cursor: "pointer" }}></img>
+                    <img onClick={() => setRating("Amazing")} alt='' src='/assets/amazingHighlight.png' style={{ height: "40px", marginLeft: "20px", cursor: "pointer" }}></img>
                 </div>
-                <Typography variant="subtitle1" component="div" style={{ marginTop: '1rem', marginLeft: "20px", fontSize: "14px" }}>
+                <div className="wrapper">
+                    <Typography variant="subtitle1" component="div" style={{ marginTop: '1rem', fontSize: "14px", fontWeight: 'bold' }}>
+                        {rating}
+                    </Typography>
+                </div>
+                <Typography variant="subtitle1" component="div" style={{ marginTop: '2rem', marginLeft: "20px", fontSize: "14px" }}>
                     Post as anonymous
                 </Typography>
                 <div style={{ marginLeft: "20px", marginTop: "1rem" }}>
